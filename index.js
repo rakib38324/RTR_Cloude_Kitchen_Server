@@ -26,7 +26,7 @@ async function run(){
 
     try{
         const serviceCollection = client.db('rtr-cloud-kitchen').collection('services');
-      
+        const reviewCollection = client.db('rtr-cloud-kitchen').collection('review')
 
         app.get('/services',async (req,res)=>{
             const query = req.query.limit || 0;
@@ -37,7 +37,7 @@ async function run(){
 
         app.post('/services',async (req,res)=>{
             const service = req.body;
-            console.log(service);
+            // console.log(service);
             const result = await serviceCollection.insertOne(service);
             res.send(result);
         })
@@ -50,7 +50,23 @@ async function run(){
             const service = await serviceCollection.findOne(query)
             res.send(service);
         })
+
+        app.get('/services/:id',async(req,res)=>{
+            const id = req.params.id;
+
+            const query = {_id: ObjectId(id)};
+
+            const service = await serviceCollection.findOne(query)
+            res.send(service);
+        })
        
+
+        app.post('/review',async (req,res)=>{
+            const review = req.body;
+            console.log(review);
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        })
 
     }
     finally{
