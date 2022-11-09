@@ -15,7 +15,7 @@ app.use(express.json());
 const USER = process.env.DB_USER
 const PASSWORD = process.env.DB_PASSWORD
 
-console.log(USER, PASSWORD)
+
 
 const uri = `mongodb+srv://${USER}:${PASSWORD}@cluster0.qlqg855.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -70,18 +70,25 @@ async function run(){
 
 
         app.get('/review',async (req,res)=>{
-            console.log(req.query)
+            // console.log(req.query)
             let query = {};
             if(req.query.serviceId){
                 query = {
                     serviceId: req.query.serviceId
                 }
             }
+            if(req.query.email){
+                query = {
+                    email: req.query.email
+                }
+            }
             // console.log(review);
-            const cursor = reviewCollection.find(query).sort({time:-1},{date:-1})
+            const cursor = reviewCollection.find(query).sort({_id:-1},{time:-1},{date:-1});
+ 
             const review = await cursor.toArray();
             res.send(review);
         })
+
 
     }
     finally{
