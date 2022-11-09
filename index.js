@@ -44,21 +44,20 @@ async function run(){
 
         app.get('/services/:id',async(req,res)=>{
             const id = req.params.id;
-
+            console.log(id)
             const query = {_id: ObjectId(id)};
-
             const service = await serviceCollection.findOne(query)
             res.send(service);
         })
 
-        app.get('/services/:id',async(req,res)=>{
+        app.get('/review/:id',async(req,res)=>{
             const id = req.params.id;
-
+            console.log(id)
             const query = {_id: ObjectId(id)};
-
-            const service = await serviceCollection.findOne(query)
-            res.send(service);
+            const review = await reviewCollection.findOne(query)
+            res.send(review);
         })
+
        
 
         app.post('/review',async (req,res)=>{
@@ -93,6 +92,19 @@ async function run(){
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const result = await reviewCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        app.patch('/review/:id',async(req,res)=>{
+            const id = req.params.id;
+            const review = req.body.review
+            const query = {_id: ObjectId(id)};
+            const updatedDoc = {
+                $set: {
+                    review: review
+                }
+            }
+            const result = await reviewCollection.updateOne(query, updatedDoc)
             res.send(result);
         })
 
