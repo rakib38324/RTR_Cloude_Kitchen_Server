@@ -25,7 +25,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
-    // console.log(authHeader)
+    console.log(authHeader)
     if (!authHeader) {
         return res.status(401).send({ message: 'Unauthorized access' })
     }
@@ -94,7 +94,22 @@ async function run() {
             res.send(result);
         })
 
-       
+        app.get('/allreview', async (req, res) => {
+            console.log(req.query.serviceId);
+
+            let query = {};
+            if (req.query.serviceId) {
+                query = {
+                    serviceId: req.query.serviceId
+                }
+            }
+            const cursor = reviewCollection.find(query).sort({ _id: -1 }, { time: -1 }, { date: -1 });
+            const review = await cursor.toArray();
+            res.send(review);
+
+        })
+
+
 
 
 
@@ -103,48 +118,21 @@ async function run() {
             let query = {};
 
             const decoded = req.decoded;
-            const serviceId = req.query.serviceId;
-            
 
 
-         
-            if (!serviceId) {
-                
-
-                if (decoded.email !== req.query.email) {
-                    res.status(403).send({ message: 'Unauthorized access' })
-                }
-
-                if (req.query.email) {
-                    query = {
-                        email: req.query.email
-                    }
-                }
-
-                const cursor = reviewCollection.find(query).sort({ _id: -1 }, { time: -1 }, { date: -1 });
-                const review = await cursor.toArray();
-                res.send(review);
-
+            if (decoded.email !== req.query.email) {
+                res.status(403).send({ message: 'Unauthorized access' })
             }
 
-            else{
-                console.log('serviceid')
-                if (req.query.serviceId) {
-                    query = {
-                        serviceId: req.query.serviceId
-                    }
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
                 }
-
-                const cursor = reviewCollection.find(query).sort({ _id: -1 }, { time: -1 }, { date: -1 });
-                const review = await cursor.toArray();
-                res.send(review);
-
             }
 
-
-            
-
-
+            const cursor = reviewCollection.find(query).sort({ _id: -1 }, { time: -1 }, { date: -1 });
+            const review = await cursor.toArray();
+            res.send(review);
 
         })
 
@@ -154,14 +142,14 @@ async function run() {
 
 
 
-        app.delete('/review/:id', async (req, res) => {
+        app.delete('/review/:id',verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await reviewCollection.deleteOne(query);
             res.send(result);
         })
 
-        app.patch('/review/:id', async (req, res) => {
+        app.patch('/review/:id',verifyJWT, async (req, res) => {
             const id = req.params.id;
             const review = req.body.review
             const query = { _id: ObjectId(id) };
